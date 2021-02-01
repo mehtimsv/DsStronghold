@@ -629,17 +629,37 @@ public:
 
         int sumOfTargetCapacities = getAttackTargetCapacitySum(targets);
 
-        //TODO : remain in lowest capacity
 
+        int sumSoldiersToAttack=0;
         for (int i = 0; i < targets.size(); ++i) {
                 int countSoldiers = getSoldierCountForAttack(castleIndex ,targets[i] ,sumOfTargetCapacities );
+                sumSoldiersToAttack += countSoldiers;
                 Army a(castleIndex , targets[i] ,getDistance(castleIndex ,targets[i]) - speed , countSoldiers);
                 armies.push_back(a);
         }
-
+        int output = (castles[castleIndex].soldiers.size() > outputCapacity) ? outputCapacity : castles[castleIndex].soldiers.size();
+        int lowestArmyIndex = getArmyIndexBySrcDes(castleIndex , getLowestCapacityDesIndex(targets) ,targets.size());
+        armies[lowestArmyIndex].count += (output - sumSoldiersToAttack);
 
     }
-
+    int getArmyIndexBySrcDes(int src , int des , int lastAttackTargetsCount){
+        for (int i = armies.size() - lastAttackTargetsCount; i < armies.size(); ++i) {
+            if(armies[i].src == src && armies[i].dest == des){
+                return i;
+            }
+        }
+    }
+    int getLowestCapacityDesIndex(vector<int> targets){
+        int min = 100000;
+        int minIndex;
+        for (int i = 0; i < targets.size(); ++i) {
+            if(castles[targets[i]].soldiers.size() <= min){
+                min = castles[targets[i]].soldiers.size();
+                minIndex = targets[i];
+            }
+        }
+        return minIndex;
+    }
     int getDistance(int srcCastleIndex ,int desCastleIndex){
         return adjMatrix[srcCastleIndex][desCastleIndex];
     }
@@ -722,13 +742,13 @@ int main() {
 //    g.castles[0].addSoldiers(s);
     for (int i = 0; i < 50; ++i) {
             g.castles[0].soldiers.push_back(Soldier(5 , 0));
-        if(i > 10)
+        if(i >= 10)
             g.castles[1].soldiers.push_back(Soldier(6 , 0));
-        if(i > 20)
+        if(i >= 20)
             g.castles[2].soldiers.push_back(Soldier(7 , 0));
-        if(i > 25)
+        if(i >= 25)
             g.castles[3].soldiers.push_back(Soldier(8 , 0));
-        if(i > 30)
+        if(i >= 30)
             g.castles[4].soldiers.push_back(Soldier(5 , 0));
     }
 
