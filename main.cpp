@@ -2,6 +2,7 @@
 #include <string>
 #include <queue>
 #include <vector>
+#include <time.h>
 using namespace std;
 template <typename T>
 class MyVector{
@@ -195,10 +196,13 @@ public:
         delete stack;
     }
 };
-
+int getRandomInt(){
+    return rand() % 1000000 + 1000000;
+}
 
 class Soldier{
 public:
+    int id;
     int power;
     int castleIndex;
     int status;//0 alive
@@ -207,6 +211,7 @@ public:
     }
 
     Soldier(int _power, int _castleIndex)  {
+        id = getRandomInt();
         power = _power;
         castleIndex = _castleIndex;
         status = 0;
@@ -214,14 +219,17 @@ public:
     bool operator<(const Soldier s){
         return power < s.power;
     }
+    bool operator>=(const Soldier s){
+        return power >= s.power;
+    }
     friend ostream &operator<<( ostream &output, const Soldier &soldier ){
-        output<<soldier.power<<endl;
+        output<<soldier.castleIndex<<"-"<<soldier.power<<endl;
         return output;
     }
 };
 
 
-
+/*
 template<class T>
 struct node {
     struct node *left;
@@ -461,8 +469,222 @@ public:
 
     }
 };
+*//*
+struct AvlNode
+{
+    Soldier data;
+    AvlNode* left;
+    AvlNode* right;
+    int height;
+};
 
+class AVL
+{
+    friend class Castle;
 
+    AvlNode* root;
+
+    void makeEmpty(AvlNode* t)
+    {
+        if (t == nullptr)
+            return;
+        makeEmpty(t->left);
+        makeEmpty(t->right);
+        delete t;
+    }
+
+    AvlNode* insert(Soldier x, AvlNode* t)
+    {
+        if (t == nullptr)
+        {
+            t = new AvlNode;
+            t->data = x;
+            t->height = 0;
+            t->left = t->right = nullptr;
+        }
+        else if (x < t->data)
+        {
+            t->left = insert(x, t->left);
+            if (height(t->left) - height(t->right) == 2)
+            {
+                if (x.power < t->left->data.power)
+                    t = singleRightRotate(t);
+                else
+                    t = doubleRightRotate(t);
+            }
+        }
+        else if (x.power >= t->data.power)
+        {
+            t->right = insert(x, t->right);
+            if (height(t->right) - height(t->left) == 2)
+            {
+                if (x.power > t->right->data.power)
+                    t = singleLeftRotate(t);
+                else
+                    t = doubleLeftRotate(t);
+            }
+        }
+        else if (x.power == t->data.power)
+            return t;
+
+        t->height = max(height(t->left), height(t->right)) + 1;
+        return t;
+    }
+
+    AvlNode* singleRightRotate(AvlNode*& t)
+    {
+        if (t->left != nullptr) {
+            AvlNode* u = t->left;
+            t->left = u->right;
+            u->right = t;
+            t->height = max(height(t->left), height(t->right)) + 1;
+            u->height = max(height(u->left), t->height) + 1;
+            return u;
+        }
+        return t;
+    }
+    AvlNode* singleLeftRotate(AvlNode*& t)
+    {
+        if (t->right != nullptr) {
+            AvlNode* u = t->right;
+            t->right = u->left;
+            u->left = t;
+            t->height = max(height(t->left), height(t->right)) + 1;
+            u->height = max(height(t->right), t->height) + 1;
+            return u;
+        }
+        return t;
+    }
+
+    AvlNode* doubleLeftRotate(AvlNode*& t)
+    {
+        t->right = singleRightRotate(t->right);
+        return singleLeftRotate(t);
+    }
+
+    AvlNode* doubleRightRotate(AvlNode*& t)
+    {
+        t->left = singleLeftRotate(t->left);
+        return singleRightRotate(t);
+    }
+
+    AvlNode* findMin(AvlNode* t)
+    {
+        if (t == nullptr)
+            return nullptr;
+        else if (t->left == nullptr)
+            return t;
+        else
+            return findMin(t->left);
+    }
+
+    AvlNode* findMax(AvlNode* t)
+    {
+        if (t == nullptr)
+            return nullptr;
+        else if (t->right == nullptr)
+            return t;
+        else
+            return findMax(t->right);
+    }
+
+    AvlNode* remove(Soldier x, AvlNode* t)
+    {
+        AvlNode* temp;
+
+        if (t == nullptr)
+            return nullptr;
+
+        else if (x.power < t->data.power)
+            t->left = remove(x, t->left);
+        else if (x.power > t->data.power)
+            t->right = remove(x, t->right);
+        else if (t->left && t->right)
+        {
+            temp = findMin(t->right);
+            t->data = temp->data;
+            t->right = remove(t->data, t->right);
+        }
+        else
+        {
+            temp = t;
+            if (t->left == nullptr)
+                t = t->right;
+            else if (t->right == nullptr)
+                t = t->left;
+            delete temp;
+        }
+        if (t == nullptr)
+            return t;
+
+        t->height = max(height(t->left), height(t->right)) + 1;
+        if (height(t->left) - height(t->right) == 2)
+        {
+            if (height(t->left->left) - height(t->left->right) == 1)
+                return singleRightRotate(t);
+            else
+                return doubleRightRotate(t);
+        }
+        else if (height(t->right) - height(t->left) == 2)
+        {
+            if (height(t->right->right) - height(t->right->left) == 1) {
+                return singleLeftRotate(t);
+            }
+            else
+                return doubleLeftRotate(t);
+        }
+        return t;
+    }
+
+    int height(AvlNode* t)
+    {
+        return (t == nullptr ? -1 : t->height);
+    }
+
+    int getBalance(AvlNode* t)
+    {
+        if (t == nullptr)
+            return 0;
+        else
+            return height(t->left) - height(t->right);
+    }
+
+    void inorder(AvlNode* t)
+    {
+        if (t == nullptr)
+            return;
+        inorder(t->left);
+        cout << t->data << " ";
+        inorder(t->right);
+    }
+
+public:
+    AVL()
+    {
+        root = nullptr;
+    }
+
+    void insert(Soldier x)
+    {
+        root = insert(x, root);
+    }
+
+    void remove(Soldier x)
+    {
+        root = remove(x, root);
+    }
+
+    void display()
+    {
+        inorder(root);
+        cout << endl;
+    }
+
+    int root_height()
+    {
+        return root->height;
+    }
+};*/
 /*
 class Castle {
 public:
@@ -528,7 +750,7 @@ public:
     string owner;
     int capacity;
     queue<int> inputQueue;
-//    AVL<Soldier> soldiers;
+//    AVL soldiersAVL;
     vector<Soldier> soldiers;
 
     Castle(){
@@ -705,23 +927,10 @@ public:
 };
 
 
-class Attack{
-public:
-    vector<int> targets;
-    Game *game;
-    void n(){
-
-    }
-
-    void setGame(Game *game) {
-        Attack::game = game;
-    }
-
-};
 
 
 int main() {
-
+    srand (time(0));
 
 
 
@@ -747,15 +956,25 @@ int main() {
 //    g.castles[0].addSoldiers(s);
     for (int i = 0; i < 50; ++i) {
             g.castles[0].soldiers.push_back(Soldier(5 , 0));
+//            g.castles[0].soldiersAVL.insert(Soldier(getRandomInt() , 0));
         if(i >= 10)
-            g.castles[1].soldiers.push_back(Soldier(6 , 0));
+            g.castles[1].soldiers.push_back(Soldier(6 , 1));
+//            g.castles[1].soldiersAVL.insert(Soldier(6 , 1));
         if(i >= 20)
-            g.castles[2].soldiers.push_back(Soldier(7 , 0));
-        if(i >= 25)
-            g.castles[3].soldiers.push_back(Soldier(8 , 0));
-        if(i >= 30)
-            g.castles[4].soldiers.push_back(Soldier(5 , 0));
+            g.castles[2].soldiers.push_back(Soldier(7 , 2));
+//            g.castles[2].soldiersAVL.insert(Soldier(7 , 2));
+        if(i >= 25){
+            g.castles[3].soldiers.push_back(Soldier(8 , 3));
+//            g.castles[3].soldiersAVL.insert(Soldier(8 , 3));
+        }
+        if(i >= 30){
+            g.castles[4].soldiers.push_back(Soldier(5 , 4));
+//            g.castles[4].soldiersAVL.insert(Soldier(5 , 4));
+        }
+
     }
+
+//    g.castles[0].soldiersAVL.display();
     int c = 0;
     while (true){
 
