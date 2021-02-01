@@ -570,8 +570,9 @@ public:
 
     }
 
-    bool move(){
-
+    bool move(int speed){
+        distance -= speed;
+        return distance <= 0;
     }
 
 
@@ -634,7 +635,7 @@ public:
         for (int i = 0; i < targets.size(); ++i) {
                 int countSoldiers = getSoldierCountForAttack(castleIndex ,targets[i] ,sumOfTargetCapacities );
                 sumSoldiersToAttack += countSoldiers;
-                Army a(castleIndex , targets[i] ,getDistance(castleIndex ,targets[i]) - speed , countSoldiers);
+                Army a(castleIndex , targets[i] ,getDistance(castleIndex ,targets[i]) , countSoldiers);
                 armies.push_back(a);
         }
         int output = (castles[castleIndex].soldiers.size() > outputCapacity) ? outputCapacity : castles[castleIndex].soldiers.size();
@@ -756,6 +757,12 @@ int main() {
 
         for (int i = 0; i < g.castleCount; ++i) {
             g.attack(i);
+        }
+        for (int i = 0; i <g.armies.size(); ++i) {
+            if(g.armies[i].move(g.speed)){
+
+            }
+
         }
 
 
