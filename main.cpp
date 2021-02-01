@@ -1,6 +1,7 @@
 #include <iostream>
 #include <string>
 #include <queue>
+#include <vector>
 using namespace std;
 template <typename T>
 class MyVector{
@@ -205,13 +206,18 @@ public:
 
     }
 
-    Soldier(int power, int castleIndex) : power(power), castleIndex(castleIndex) {
+    Soldier(int _power, int _castleIndex)  {
+        power = _power;
+        castleIndex = _castleIndex;
         status = 0;
     }
     bool operator<(const Soldier s){
         return power < s.power;
     }
-
+    friend ostream &operator<<( ostream &output, const Soldier &soldier ){
+        output<<soldier.power<<endl;
+        return output;
+    }
 };
 
 
@@ -521,7 +527,8 @@ public:
     string name;
     string owner;
     int capacity;
-    AVL<Soldier> soldiers;
+//    AVL<Soldier> soldiers;
+    vector<Soldier> soldiers;
 
     Castle(){
 
@@ -538,15 +545,39 @@ public:
     }
 
     void addSoldiers(int s[]){
-        for (int i = 0; i < (sizeof(s)/sizeof(*s)); ++i) {
-            soldiers.insert(soldiers.root , Soldier(s[i] , index));
+        int len = sizeof(s)/sizeof(s[0]);
+        for (int i = 0; i < len; ++i) {
+             soldiers.push_back(Soldier(s[i] , index));
         }
     }
     void printSoldiers(){
-        soldiers.levelorder_newline();
+        for (int i = 0; i < soldiers.size(); ++i) {
+            cout<<soldiers[i];
+        }
     }
 };
 
+class Army{
+public:
+
+    queue<Soldier> soldiers;
+    int src ,dest , distance;
+    int count;
+    Army(){
+
+    }
+    Army(int src, int dest, int distance,int count) : src(src), dest(dest), distance(distance) ,count(count) {
+
+    }
+
+    bool move(){
+
+    }
+
+
+
+
+};
 
 class Game {
 public:
@@ -554,13 +585,14 @@ public:
     int castleCount;
     Castle* castles;
     int outputCapacity;
-
-
+    int speed;
+    vector<Army> armies;
 
     // Initialize the matrix to zero
-    Game(int count , int _outputCapacity) {
+    Game(int count , int _outputCapacity , int _speed) {
         this->castleCount = count;
         this->outputCapacity = _outputCapacity;
+        this->speed = _speed;
         adjMatrix = new int*[count];
         castles = new Castle[count];
 
@@ -573,21 +605,51 @@ public:
     }
 
 
-    MyVector<int> getTargets(int index){
-       // Castle targetCastles[castleCount];
+    vector<int> getTargets(int index){
+        // Castle targetCastles[castleCount];
 //        int targetCastlesIndex[castleCount];
-        MyVector<int> target(castleCount);
+        vector<int> targets;
 
         for (int i = 0; i < castleCount; i++) {
             if(adjMatrix[index][i] > 0){
-                target.push_back(i);
+                targets.push_back(i);
             }
         }
-        return target;
+        return targets;
+    }
+    int getAttackTargetCapacitySum(vector<int> v){
+        int sum = 0;
+        for (int i = 0; i < v.size(); ++i) {
+            sum += castles[v[i]].soldiers.size();
+        }
+        return sum;
+    }
+    void attack(int castleIndex){
+        vector<int> targets = getTargets(castleIndex);
+
+        int sumOfTargetCapacities = getAttackTargetCapacitySum(targets);
+
+        //TODO : remain in lowest capacity
+
+        for (int i = 0; i < targets.size(); ++i) {
+                int countSoldiers = getSoldierCountForAttack(castleIndex ,targets[i] ,sumOfTargetCapacities );
+                Army a(castleIndex , targets[i] ,getDistance(castleIndex ,targets[i]) - speed , countSoldiers);
+                armies.push_back(a);
+        }
+
+
     }
 
+    int getDistance(int srcCastleIndex ,int desCastleIndex){
+        return adjMatrix[srcCastleIndex][desCastleIndex];
+    }
 
+    int getSoldierCountForAttack(int srcCastleIndex ,int desCastleIndex , int sumAllCastle){
+        int output = (castles[srcCastleIndex].soldiers.size() > outputCapacity) ? outputCapacity : castles[srcCastleIndex].soldiers.size();
 
+        float s = (float)sumAllCastle;
+        return castles[desCastleIndex].soldiers.size() / s * output;
+    }
     // Add edges
     void addEdge(int i, int j , int weight) {
         adjMatrix[i][j] = weight;
@@ -617,13 +679,29 @@ public:
     }
 };
 
+
+class Attack{
+public:
+    vector<int> targets;
+    Game *game;
+    void n(){
+
+    }
+
+    void setGame(Game *game) {
+        Attack::game = game;
+    }
+
+};
+
+
 int main() {
 
 
-    Game g(5 , 25);
+
 
     // adj matrix :
-
+    Game g(5 , 10 , 50);
     g.addEdge(0, 1,300);
     g.addEdge(1, 2,210);
     g.addEdge(1, 3,366);
@@ -631,18 +709,42 @@ int main() {
     g.addEdge(2, 3,120);
     g.addEdge(3, 4,200);
 
+    g.toString();
 
     //castle info :
-    g.castles[0].setInfo(0 , 100);
-    g.castles[1].setInfo(0 , 200);
-    g.castles[2].setInfo(0 , 300);
-    g.castles[3].setInfo(0 , 400);
-    g.castles[4].setInfo(0 , 500);
+    g.castles[0].setInfo(0 , 50);
+    g.castles[1].setInfo(1 , 200);
+    g.castles[2].setInfo(2 , 300);
+    g.castles[3].setInfo(3 , 400);
+    g.castles[4].setInfo(4 , 500);
+
+//    int s[5] = {5,4,3,2,1};
+//    g.castles[0].addSoldiers(s);
+    for (int i = 0; i < 50; ++i) {
+            g.castles[0].soldiers.push_back(Soldier(5 , 0));
+        if(i > 10)
+            g.castles[1].soldiers.push_back(Soldier(6 , 0));
+        if(i > 20)
+            g.castles[2].soldiers.push_back(Soldier(7 , 0));
+        if(i > 25)
+            g.castles[3].soldiers.push_back(Soldier(8 , 0));
+        if(i > 30)
+            g.castles[4].soldiers.push_back(Soldier(5 , 0));
+    }
+
+    while (true){
+
+        for (int i = 0; i < g.castleCount; ++i) {
+            g.attack(i);
+        }
+
+
+        break;
+    }
 
 
 
-
-    g.toString();
+//    g.toString();
 
 }
 
