@@ -527,6 +527,7 @@ public:
     string name;
     string owner;
     int capacity;
+    queue<int> inputQueue;
 //    AVL<Soldier> soldiers;
     vector<Soldier> soldiers;
 
@@ -563,6 +564,7 @@ public:
     queue<Soldier> soldiers;
     int src ,dest , distance;
     int count;
+    bool isArrived = false;
     Army(){
 
     }
@@ -723,7 +725,7 @@ int main() {
 
     // adj matrix :
     Game g(5 , 10 , 50);
-    g.addEdge(0, 1,300);
+    g.addEdge(0, 1,60);
     g.addEdge(1, 2,210);
     g.addEdge(1, 3,366);
     g.addEdge(1, 4,400);
@@ -759,14 +761,20 @@ int main() {
             g.attack(i);
         }
         for (int i = 0; i <g.armies.size(); ++i) {
-            if(g.armies[i].move(g.speed)){
+            if(g.armies[i].move(g.speed) && !g.armies[i].isArrived){
+                int targetDes = g.armies[i].dest;
+
+
+                //TODO: add soldiers to input queue
+                g.castles[targetDes].inputQueue.push(g.armies[i].count);
+                g.armies[i].isArrived = true;
 
             }
 
         }
 
 
-        break;
+//        break;
     }
 
 
