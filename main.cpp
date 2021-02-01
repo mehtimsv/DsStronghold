@@ -1,5 +1,6 @@
 #include <iostream>
 #include <string>
+#include <queue>
 using namespace std;
 template <typename T>
 class MyVector{
@@ -94,6 +95,9 @@ class Queue {
 
 
 public:
+    Queue(){
+
+    }
     Queue(int qCapacity) : capacity(qCapacity) {
         rear = front = 0;
         queue = new T[capacity];
@@ -110,7 +114,9 @@ public:
             rear = (rear + 1) % capacity;
         }
     }
-
+    T getFront(){
+        return queue[front];
+    }
     void pop() {
         if (isEmpty())throw "Queue is already empty";
         else {
@@ -190,7 +196,265 @@ public:
 };
 
 
+class Soldier{
+public:
+    int power;
+    int castleIndex;
+    int status;//0 alive
+    Soldier(){
 
+    }
+
+    Soldier(int power, int castleIndex) : power(power), castleIndex(castleIndex) {
+        status = 0;
+    }
+    bool operator<(const Soldier s){
+        return power < s.power;
+    }
+
+};
+
+
+
+template<class T>
+struct node {
+    struct node *left;
+    T data;
+    int height;
+    struct node *right;
+
+};
+template<class T>
+class AVL
+{
+private:
+
+public:
+    struct node<T> * root;
+    AVL(){
+        this->root = NULL;
+    }
+
+    int calheight(struct node<Soldier> *p){
+
+        if(p->left && p->right){
+            if (p->left->height < p->right->height)
+                return p->right->height + 1;
+            else return  p->left->height + 1;
+        }
+        else if(p->left && p->right == NULL){
+            return p->left->height + 1;
+        }
+        else if(p->left ==NULL && p->right){
+            return p->right->height + 1;
+        }
+        return 0;
+
+    }
+
+    int bf(struct node<T> *n){
+        if(n->left && n->right){
+            return n->left->height - n->right->height;
+        }
+        else if(n->left && n->right == NULL){
+            return n->left->height;
+        }
+        else if(n->left== NULL && n->right ){
+            return -n->right->height;
+        }
+    }
+
+    struct node<T> * llrotation(struct node<T> *n){
+        struct node<T> *p;
+        struct node<T> *tp;
+        p = n;
+        tp = p->left;
+
+        p->left = tp->right;
+        tp->right = p;
+
+        return tp;
+    }
+
+
+    struct node<T> * rrrotation(struct node<T> *n){
+        struct node<T> *p;
+        struct node<T> *tp;
+        p = n;
+        tp = p->right;
+
+        p->right = tp->left;
+        tp->left = p;
+
+        return tp;
+    }
+
+
+    struct node<T> * rlrotation(struct node<T> *n){
+        struct node<T> *p;
+        struct node<T> *tp;
+        struct node<T> *tp2;
+        p = n;
+        tp = p->right;
+        tp2 =p->right->left;
+
+        p -> right = tp2->left;
+        tp ->left = tp2->right;
+        tp2 ->left = p;
+        tp2->right = tp;
+
+        return tp2;
+    }
+
+    struct node<T> * lrrotation(struct node<T> *n){
+        struct node<T> *p;
+        struct node<T> *tp;
+        struct node<T> *tp2;
+        p = n;
+        tp = p->left;
+        tp2 =p->left->right;
+
+        p -> left = tp2->right;
+        tp ->right = tp2->left;
+        tp2 ->right = p;
+        tp2->left = tp;
+
+        return tp2;
+    }
+
+    struct node<T>* insert(struct node<T> *r,T data){
+
+        if(r==NULL){
+            struct node<T> *n;
+            n = new struct node<T>;
+            n->data = data;
+            r = n;
+            r->left = r->right = NULL;
+            r->height = 1;
+            return r;
+        }
+        else{
+            if(data < r->data)
+                r->left = insert(r->left,data);
+            else
+                r->right = insert(r->right,data);
+        }
+
+        r->height = calheight(r);
+
+        if(bf(r)==2 && bf(r->left)==1){
+            r = llrotation(r);
+        }
+        else if(bf(r)==-2 && bf(r->right)==-1){
+            r = rrrotation(r);
+        }
+        else if(bf(r)==-2 && bf(r->right)==1){
+            r = rlrotation(r);
+        }
+        else if(bf(r)==2 && bf(r->left)==-1){
+            r = lrrotation(r);
+        }
+
+        return r;
+
+    }
+
+    void levelorder_newline(){
+        if (this->root == NULL){
+            cout<<"\n"<<"Empty tree"<<"\n";
+            return;
+        }
+        levelorder_newline(this->root);
+    }
+
+    void levelorder_newline(struct node<T> *v){
+        queue <struct node<T> *> q;
+        struct node<T> *cur;
+        q.push(v);
+        q.push(NULL);
+
+        while(!q.empty()){
+            cur = q.front();
+            q.pop();
+            if(cur == NULL && q.size()!=0){
+                cout<<"\n";
+
+                q.push(NULL);
+                continue;
+            }
+            if(cur!=NULL){
+                cout<<" "<<cur->data.power;
+
+                if (cur->left!=NULL){
+                    q.push(cur->left);
+                }
+                if (cur->right!=NULL){
+                    q.push(cur->right);
+                }
+            }
+
+
+        }
+    }
+
+    struct node<T> * deleteNode(struct node<T> *p,T data){
+
+        if(p->left == NULL && p->right == NULL){
+            if(p==this->root)
+                this->root = NULL;
+            delete p;
+            return NULL;
+        }
+
+        struct node<T> *t;
+        struct node<T> *q;
+        if(p->data < data){
+            p->right = deleteNode(p->right,data);
+        }
+        else if(p->data > data){
+            p->left = deleteNode(p->left,data);
+        }
+        else{
+            if(p->left != NULL){
+                q = inpre(p->left);
+                p->data = q->data;
+                p->left=deleteNode(p->left,q->data);
+            }
+            else{
+                q = insuc(p->right);
+                p->data = q->data;
+                p->right = deleteNode(p->right,q->data);
+            }
+        }
+
+        if(bf(p)==2 && bf(p->left)==1){ p = llrotation(p); }
+        else if(bf(p)==2 && bf(p->left)==-1){ p = lrrotation(p); }
+        else if(bf(p)==2 && bf(p->left)==0){ p = llrotation(p); }
+        else if(bf(p)==-2 && bf(p->right)==-1){ p = rrrotation(p); }
+        else if(bf(p)==-2 && bf(p->right)==1){ p = rlrotation(p); }
+        else if(bf(p)==-2 && bf(p->right)==0){ p = llrotation(p); }
+
+
+        return p;
+    }
+
+    struct node<T>* inpre(struct node<T>* p){
+        while(p->right!=NULL)
+            p = p->right;
+        return p;
+    }
+
+    struct node<T>* insuc(struct node<T>* p){
+        while(p->left!=NULL)
+            p = p->left;
+
+        return p;
+    }
+
+    ~AVL(){
+
+    }
+};
 
 
 /*
@@ -248,17 +512,7 @@ void printGraph(Graph const &graph, int N)
 }*/
 
 
-class Soldier{
-public:
-    int power;
-    string castle;
-    int speed;
-    int status; //
 
-
-
-
-};
 
 
 class Castle{
@@ -267,22 +521,29 @@ public:
     string name;
     string owner;
     int capacity;
-    Soldier* soldiers;
+    AVL<Soldier> soldiers;
 
     Castle(){
 
     }
 
     Castle(int index, const string &name, const string &owner, int capacity) : index(index),name(name),owner(owner),capacity(capacity){
-        soldiers = new Soldier[capacity];
+//        soldiers = new Soldier[capacity];
+
     }
 
     void setInfo(int index, int capacity){
         index = index;
         capacity = capacity;
     }
-    static Castle buildCastle(){
-        return new Castle()
+
+    void addSoldiers(int s[]){
+        for (int i = 0; i < (sizeof(s)/sizeof(*s)); ++i) {
+            soldiers.insert(soldiers.root , Soldier(s[i] , index));
+        }
+    }
+    void printSoldiers(){
+        soldiers.levelorder_newline();
     }
 };
 
@@ -322,7 +583,7 @@ public:
                 target.push_back(i);
             }
         }
-
+        return target;
     }
 
 
@@ -375,8 +636,8 @@ int main() {
     g.castles[0].setInfo(0 , 100);
     g.castles[1].setInfo(0 , 200);
     g.castles[2].setInfo(0 , 300);
-    g.castles[4].setInfo(0 , 400);
-    g.castles[5].setInfo(0 , 500);
+    g.castles[3].setInfo(0 , 400);
+    g.castles[4].setInfo(0 , 500);
 
 
 
