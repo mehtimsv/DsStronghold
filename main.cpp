@@ -535,14 +535,15 @@ public:
 
     }
 
-    Castle(int index, const string &name, const string &owner, int capacity) : index(index),name(name),owner(owner),capacity(capacity){
+    Castle(int _index, const string &name, const string &owner, int _capacity){
 //        soldiers = new Soldier[capacity];
-
+        index = _index;
+        capacity = _capacity;
     }
 
-    void setInfo(int index, int capacity){
-        index = index;
-        capacity = capacity;
+    void setInfo(int _index, int _capacity){
+        index = _index;
+        capacity = _capacity;
     }
 
     void addSoldiers(int s[]){
@@ -586,7 +587,8 @@ class Game {
 public:
     int** adjMatrix;
     int castleCount;
-    Castle* castles;
+//    Castle* castles;
+    vector<Castle> castles;
     int outputCapacity;
     int speed;
     vector<Army> armies;
@@ -597,8 +599,8 @@ public:
         this->outputCapacity = _outputCapacity;
         this->speed = _speed;
         adjMatrix = new int*[count];
-        castles = new Castle[count];
-
+//        castles = new Castle[count];
+        castles.resize(count);
         for (int i = 0; i < count; i++) {
             adjMatrix[i] = new int[count];
             for (int j = 0; j < count; j++){
@@ -754,7 +756,7 @@ int main() {
         if(i >= 30)
             g.castles[4].soldiers.push_back(Soldier(5 , 0));
     }
-
+    int c = 0;
     while (true){
 
         for (int i = 0; i < g.castleCount; ++i) {
@@ -773,8 +775,9 @@ int main() {
 
         }
 
-
-//        break;
+        c++;
+        if(c == 10)
+            break;
     }
 
 
