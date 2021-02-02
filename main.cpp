@@ -3,6 +3,7 @@
 #include <queue>
 #include <vector>
 #include <time.h>
+#include <cmath>
 using namespace std;
 template <typename T>
 class MyVector{
@@ -750,6 +751,7 @@ public:
     string owner;
     int capacity;
     queue<Soldier> inputQueue;
+    queue<Soldier> enemyQueue;
 //    AVL soldiersAVL;
     vector<Soldier> soldiers;
 
@@ -943,6 +945,23 @@ public:
         cout<<srcCastleIndex<<"-"<<desCastleIndex<<"-"<<sumAllCastle<<"-"<<castles[desCastleIndex].soldiers.size() / s * output<<endl;
         return castles[desCastleIndex].soldiers.size() / s * output;
     }
+
+    void crossTheGate(){
+        for (int castleIndex = 0; castleIndex < castles.size(); castleIndex++) {
+            if(!castles[castleIndex].inputQueue.empty()){
+
+                float behindGateCount = (float)castles[castleIndex].inputQueue.size();
+                int countCanCrossTheGate =  ceil(behindGateCount / castles[castleIndex].soldiers.size());
+//                cout<<"cross the gate "<<castleIndex<<":"<<countCanCrossTheGate<<endl;
+                for (int i = 0; i < countCanCrossTheGate; ++i) {
+                    castles[castleIndex].enemyQueue.push(castles[castleIndex].inputQueue.front());
+                    castles[castleIndex].inputQueue.pop();
+                }
+            }
+
+        }
+    }
+
     // Add edges
     void addEdge(int i, int j , int weight) {
         adjMatrix[i][j] = weight;
@@ -1044,9 +1063,9 @@ int main() {
             }
 
         }
-
+        g.crossTheGate();
         c++;
-        if(c == 5)
+        if(c == 3)
             break;
     }
 
