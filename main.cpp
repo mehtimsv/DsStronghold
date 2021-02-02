@@ -4,6 +4,7 @@
 #include <vector>
 #include <time.h>
 #include <cmath>
+#include <stack>
 using namespace std;
 template <typename T>
 class MyVector{
@@ -170,9 +171,11 @@ public:
         stack[++top] = item;
     }
 
-    void pop() {
+    T pop() {
         if (top == -1) throw "Stack is already empty";
+        T p = stack[top];
         stack[top--].~T();
+        return p;
     }
 
     int search(T value) {
@@ -199,6 +202,15 @@ public:
 };
 int getRandomInt(){
     return rand() % 1000000 + 1000000;
+}
+int getSumMultiDice(int count){
+    int s = 0;
+    for (int i = 0; i < count; ++i) {
+        s += (rand() % 6 +1);
+        cout<<"dice"<<s;
+    }
+    cout<<"\n";
+    return s;
 }
 
 class Soldier{
@@ -754,6 +766,7 @@ public:
     queue<Soldier> enemyQueue;
 //    AVL soldiersAVL;
     vector<Soldier> soldiers;
+    stack<Soldier> deadStack;
 
     Castle(){
 
@@ -790,6 +803,19 @@ public:
             soldiers.erase(soldiers.begin() + i);
         }
         return tmp;
+    }
+    Soldier chooseSoldierToWar(int enemyPower){
+        int minPowerDifrence = 100000;
+        int minIndexSolder;
+        for (int i = 0; i < soldiers.size(); ++i) {
+            if(abs(enemyPower - soldiers[i].power) < minPowerDifrence){
+                minPowerDifrence = abs(enemyPower - soldiers[i].power);
+                minIndexSolder = i;
+            }
+        }
+        Soldier chosen = soldiers[minIndexSolder];
+        soldiers.erase(soldiers.begin() + minIndexSolder);
+        return chosen;
     }
 
 };
@@ -964,6 +990,35 @@ public:
         }
     }
 
+
+    void war(){
+        for (int castleIndex = 0; castleIndex < castles.size(); castleIndex++) {
+            int warCount = castles[castleIndex].enemyQueue.size();
+            while(!castles[castleIndex].enemyQueue.empty() && warCount > 0){
+
+                Soldier attackerEnemy = castles[castleIndex].enemyQueue.front();
+                castles[castleIndex].enemyQueue.pop();
+                Soldier defencer = castles[castleIndex].chooseSoldierToWar(attackerEnemy.power);
+                if(isEnemyWon(attackerEnemy , defencer)){
+                    castles[castleIndex].enemyQueue.push(attackerEnemy);
+                    castles[castleIndex].deadStack.push(defencer);
+                }else{
+                    castles[castleIndex].soldiers.push_back(defencer);
+                    castles[attackerEnemy.castleIndex].deadStack.push(attackerEnemy);
+                }
+
+                warCount--;
+            }
+        }
+    }
+
+    bool isEnemyWon(Soldier enemy , Soldier defencer){
+        if(getSumMultiDice(enemy.power) > getSumMultiDice(defencer.power)){
+            return true;
+        }
+        return false;
+    }
+
     // Add edges
     void addEdge(int i, int j , int weight) {
         adjMatrix[i][j] = weight;
@@ -1066,6 +1121,8 @@ int main() {
 
         }
         g.crossTheGate();
+
+        g.war();
         c++;
         if(c == 3)
             break;
