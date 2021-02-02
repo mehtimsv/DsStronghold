@@ -768,6 +768,9 @@ void printGraph(Graph const &graph, int N)
 
 class Castle{
 public:
+    char color;
+    int d;
+    int p;
     int index;
     int capacity;
     int conqueredBy = -1;
@@ -878,6 +881,9 @@ public:
         adjMatrix = new int*[count];
 //        castles = new Castle[count];
         castles.resize(count);
+        for (int k = 0; k < count; ++k)
+            castles[k].index = k;
+
         for (int i = 0; i < count; i++) {
             adjMatrix[i] = new int[count];
             for (int j = 0; j < count; j++){
@@ -886,7 +892,43 @@ public:
         }
     }
 
+    void BFS(){
+        for (auto &v : castles) // access by reference to avoid copying
+        {
+            v.color = 'w';
+            v.d = -1;
+            v.p = -1;
+        }
+        castles[0].color = 'g';
+        castles[0].d = 0;
+        castles[0].p = -1;
+        QUEUE<Castle> q;
+        q.push(castles[0]);
+        while (!q.empty()){
+            Castle u = q.front();
+            q.pop();
+            for (auto &x : getNeighbers(u.index)) {
+                if (castles[x].color == 'w'){
+                    castles[x].color = 'g';
+                    castles[x].d = u.d + 1;
+                    castles[x].p = u.index;
+                    q.push(castles[x]);
+                }
+            }
+            castles[u.index].color = 'b';
 
+        }
+    }
+
+    vector<int> getNeighbers(int castleIndex){
+        vector<int> neighbers;
+        for (int i = 0; i < castleCount; i++) {
+            if(adjMatrix[castleIndex][i] > 0){
+                neighbers.push_back(i);
+            }
+        }
+        return neighbers;
+    }
     vector<int> getTargets(int index){
         // Castle targetCastles[castleCount];
 //        int targetCastlesIndex[castleCount];
@@ -1116,6 +1158,7 @@ int main() {
             g.addEdge(i , j , w);
         }
     }
+    g.BFS();
     // adj matrix :
 //    Game g(5 , 10 , 50 , 0.5);
     /*g.addEdge(0, 1,60);
