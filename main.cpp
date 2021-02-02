@@ -5,6 +5,15 @@
 #include <time.h>
 #include <cmath>
 #include <stack>
+#define SIZE 1000
+#define CHECK true
+#if CHECK
+#define STACK stack
+#define QUEUE queue
+#else
+#define STACK Stack
+#define QUEUE Queue
+#endif
 using namespace std;
 template <typename T>
 class MyVector{
@@ -93,113 +102,114 @@ public:
 };
 
 template<class T>
-class Queue {
-    T *queue;
-    int rear, front, capacity;
-
+class Queue
+{
+    T *arr;
+    int capacity,ifront,rear,count;
 
 public:
-    Queue(){
-
+    Queue(int size = SIZE){
+        arr = new T[size];
+        capacity = size;
+        ifront = 0;
+        rear = -1;
+        count = 0;
     }
-    Queue(int qCapacity) : capacity(qCapacity) {
-        rear = front = 0;
-        queue = new T[capacity];
+    ~Queue(){
+        delete[] arr;
     }
 
-    bool isEmpty() {
-        return front == rear;
-    }
-
-    void push(T item) {
-        if ((rear + 1) % capacity == front) throw "Queue is already full";
-        else {
-            queue[rear] = item;
-            rear = (rear + 1) % capacity;
+    void pop(){
+        if (empty())
+        {
+            cout << "UnderFlow\nProgram Terminated\n";
+            exit(EXIT_FAILURE);
         }
+
+        ifront = (ifront + 1) % capacity;
+        count--;
     }
-    T getFront(){
-        return queue[front];
-    }
-    void pop() {
-        if (isEmpty())throw "Queue is already empty";
-        else {
-            // T last = queue[front];
-            front = (front + 1) % capacity;
-            queue[front].~T();
-            //return (last);
+    void push(T item){
+        if (full())
+        {
+            cout << "OverFlow\nProgram Terminated\n";
+            exit(EXIT_FAILURE);
         }
+        rear = (rear + 1) % capacity;
+        arr[rear] = item;
+        count++;
     }
-    int search(T value) {
-        for (int i = front+1; i != rear; i = (i + 1) % capacity)
-            if (queue[i] == value)
-                return i;
-        return -1;
+    T front(){
+        if (empty())
+        {
+            cout << "UnderFlow\nProgram Terminated\n";
+            exit(EXIT_FAILURE);
+        }
+        return arr[ifront];
     }
-    friend ostream &operator<<(ostream &output, const Queue <T> &queue) {
-        for (int i = queue.front; i != queue.rear; i = (i + 1) % queue.capacity)
-            output << queue.queue[i] << " ";
-        output << "\n";
-        return output;
+    int size(){
+        return count;
     }
-
-    int getSize() {
-        if (rear >= front)
-            return (rear - front) % capacity;
-        return (front - rear) % capacity;
+    bool empty(){
+        return (size() == 0);
     }
-
-    ~Queue() {
-        delete queue;
+    bool full(){
+        return (size() == capacity);
     }
-
 };
 
 template<class T>
-class Stack {
-private:
-    T *stack;
+class Stack
+{
+    T *arr;
+    int itop;
     int capacity;
-    int top;
+
 public:
-    Stack(int stackCapacity) : capacity(stackCapacity) {
-        stack = new T[capacity];
-        top = -1;
+    Stack(int size = SIZE)
+    {
+        arr = new T[size];
+        capacity = size;
+        itop = -1;
+    }
+    ~Stack(){
+        delete[] arr;
     }
 
-    void push(T item) {
-        stack[++top] = item;
-    }
+    void push(T x)
+    {
+        if (full()){
+            cout << "OverFlow\nProgram Terminated\n";
+            exit(EXIT_FAILURE);
+        }
 
+        arr[++itop] = x;
+    }
     T pop() {
-        if (top == -1) throw "Stack is already empty";
-        T p = stack[top];
-        stack[top--].~T();
-        return p;
+        if (empty()){
+            cout << "UnderFlow\nProgram Terminated\n";
+            exit(EXIT_FAILURE);
+        }
+        return arr[itop--];
+    }
+    T top() {
+        if (!empty())
+            return arr[itop];
+        else
+            exit(EXIT_FAILURE);
     }
 
-    int search(T value) {
-        for (int i = 0; i <= top; i++)
-            if (stack[i] == value)
-                return i;
-        return -1;
+    int size(){
+        return itop + 1;
     }
-
-    int getSize() {
-        return top + 1;
+    bool empty(){
+        return itop == -1;    // or return size() == 0;
     }
-
-    friend ostream &operator<<(ostream &output, const Stack<T> &stack) {
-        for (int i = 0; i <= stack.top; i++)
-            output << stack.stack[i] << " ";
-        output << "\n";
-        return output;
-    }
-
-    ~Stack() {
-        delete stack;
+    bool full(){
+        return itop == capacity - 1;
     }
 };
+
 int getRandomInt(){
     return rand() % 1000000 + 1000000;
 }
@@ -761,11 +771,11 @@ public:
     int index;
     int capacity;
     int conqueredBy = -1;
-    queue<Soldier> inputQueue;
-    queue<Soldier> enemyQueue;
+    QUEUE<Soldier> inputQueue;
+    QUEUE<Soldier> enemyQueue;
 //    AVL soldiersAVL;
     vector<Soldier> soldiers;
-    stack<Soldier> deadStack;
+    STACK<Soldier> deadStack;
 
     Castle(){
 
@@ -793,8 +803,8 @@ public:
             cout<<soldiers[i];
         }
     }
-    queue<Soldier> topSoldier(int count){
-        queue<Soldier> tmp;
+    QUEUE<Soldier> topSoldier(int count){
+        QUEUE<Soldier> tmp;
         for (int i = 0; i < count; ++i) {
             tmp.push(soldiers.back());
         }
@@ -827,14 +837,14 @@ public:
 class Army{
 public:
 
-    queue<Soldier> soldiers;
+    QUEUE<Soldier> soldiers;
     int src ,dest , distance;
     int count;
     bool isArrived = false;
     Army(){
 
     }
-    Army(int src, int dest, int distance,int count,queue<Soldier> attackers) : src(src), dest(dest), distance(distance) ,count(count) {
+    Army(int src, int dest, int distance,int count,QUEUE<Soldier> attackers) : src(src), dest(dest), distance(distance) ,count(count) {
         soldiers = attackers;
     }
 
@@ -911,7 +921,7 @@ public:
                 for (int i = 0; i < targets.size(); ++i) {
                     int countSoldiers = getSoldierCountForAttack(castleIndex ,targets[i] ,sumOfTargetCapacities );
                     if(countSoldiers > 0){
-                        queue<Soldier> qAttackers = castles[castleIndex].topSoldier(countSoldiers);
+                        QUEUE<Soldier> qAttackers = castles[castleIndex].topSoldier(countSoldiers);
                         sumSoldiersToAttack += countSoldiers;
                         Army a(castleIndex , targets[i] ,getDistance(castleIndex ,targets[i]) , countSoldiers , qAttackers);
                         armies.push_back(a);
@@ -922,7 +932,7 @@ public:
                 int remainCount = (output - sumSoldiersToAttack);
                 armies[lowestArmyIndex].count += remainCount;
 
-                queue<Soldier> qRemainAttackers = castles[castleIndex].topSoldier(remainCount);
+                QUEUE<Soldier> qRemainAttackers = castles[castleIndex].topSoldier(remainCount);
                 while (!qRemainAttackers.empty()){
                     armies[lowestArmyIndex].soldiers.push(qRemainAttackers.front());
                     qRemainAttackers.pop();
