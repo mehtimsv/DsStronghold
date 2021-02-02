@@ -341,8 +341,11 @@ public:
     }
 
     bool move(int speed){
-        distance -= speed;
-        return distance <= 0;
+        if(!isArrived){
+            distance -= speed;
+            return distance <= 0;
+        }
+        return true;
     }
 
 
