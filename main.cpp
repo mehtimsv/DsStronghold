@@ -217,9 +217,9 @@ int getSumMultiDice(int count){
     int s = 0;
     for (int i = 0; i < count; ++i) {
         s += (rand() % 6 +1);
-        cout<<"dice"<<s;
+//        cout<<"dice"<<s;
     }
-    cout<<"\n";
+//    cout<<"\n";
     return s;
 }
 
@@ -519,7 +519,7 @@ public:
         int output = (castles[srcCastleIndex].soldiers.size() > outputCapacity) ? outputCapacity : castles[srcCastleIndex].soldiers.size();
 
         float s = (float)sumAllCastle;
-        cout<<srcCastleIndex<<"-"<<desCastleIndex<<"-"<<sumAllCastle<<"-"<<castles[desCastleIndex].soldiers.size() / s * output<<endl;
+//        cout<<srcCastleIndex<<"-"<<desCastleIndex<<"-"<<sumAllCastle<<"-"<<castles[desCastleIndex].soldiers.size() / s * output<<endl;
         return castles[desCastleIndex].soldiers.size() / s * output;
     }
     void armyMovement(){
