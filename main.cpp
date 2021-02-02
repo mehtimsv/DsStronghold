@@ -851,13 +851,15 @@ public:
     vector<Castle> castles;
     int outputCapacity;
     int speed;
+    float healSpeed;
     vector<Army> armies;
 
     // Initialize the matrix to zero
-    Game(int count , int _outputCapacity , int _speed) {
+    Game(int count , int _outputCapacity , int _speed , float _healSpeed) {
         this->castleCount = count;
         this->outputCapacity = _outputCapacity;
         this->speed = _speed;
+        this->healSpeed = _healSpeed;
         adjMatrix = new int*[count];
 //        castles = new Castle[count];
         castles.resize(count);
@@ -1024,7 +1026,22 @@ public:
         }
         return false;
     }
+    void riseOfDeads(){
+        static float healProgress = 0;
+        healProgress += healSpeed;
+        if(healProgress >= 1){
+            for (int castleIndex = 0; castleIndex < castles.size(); castleIndex++) {
+                if(!castles[castleIndex].deadStack.empty() && castles[castleIndex].conqueredBy == -1){
+                    for (int i = 0; i <healProgress; ++i) {
+                        castles[castleIndex].soldiers.push_back(castles[castleIndex].deadStack.top());
+                        castles[castleIndex].deadStack.pop();
+                    }
+                }
+            }
+            healProgress = 0;
+        }
 
+    }
     // Add edges
     void addEdge(int i, int j , int weight) {
         adjMatrix[i][j] = weight;
@@ -1070,7 +1087,7 @@ int main() {
 
 
     // adj matrix :
-    Game g(5 , 10 , 50);
+    Game g(5 , 10 , 50 , 0.5);
     g.addEdge(0, 1,60);
     g.addEdge(1, 2,210);
     g.addEdge(1, 3,366);
@@ -1131,6 +1148,7 @@ int main() {
         g.war();
 
         //TODO: rise of deads
+        g.riseOfDeads();
         c++;
         if(c == 3)
             break;
