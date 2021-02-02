@@ -889,7 +889,7 @@ public:
         }
         return sum;
     }
-    void attack(){
+    void buildArmyToAttack(){
         for (int castleIndex = 0; castleIndex < castles.size(); ++castleIndex) {
             if(!castles[castleIndex].soldiers.empty()){
                 vector<int> targets = getTargets(castleIndex);
@@ -1116,7 +1116,7 @@ int main() {
         /*for (int i = 0; i < g.castleCount; ++i) {
             g.attack(i);
         }*/
-        g.attack();
+        g.buildArmyToAttack();
         /*for (int i = 0; i <g.armies.size(); ++i) {
             if(g.armies[i].move(g.speed) && !g.armies[i].isArrived){
                 int targetDes = g.armies[i].dest;
