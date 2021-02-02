@@ -793,15 +793,20 @@ public:
             cout<<soldiers[i];
         }
     }
-    queue<Soldier> topPopSoldier(int count){
+    queue<Soldier> topSoldier(int count){
         queue<Soldier> tmp;
         for (int i = 0; i < count; ++i) {
-            tmp.push(soldiers[i]);
+            tmp.push(soldiers.back());
         }
-        for (int i = 0; i < count; ++i) {
+        /*for (int i = 0; i < count; ++i) {
             soldiers.erase(soldiers.begin() + i);
-        }
+        }*/
         return tmp;
+    }
+    void popSoldiers(int count){
+        for (int i = 0; i < count; ++i) {
+            soldiers.pop_back();
+        }
     }
     Soldier chooseSoldierToWar(int enemyPower){
         int minPowerDifrence = 100000;
@@ -879,7 +884,9 @@ public:
 
         for (int i = 0; i < castleCount; i++) {
             if(adjMatrix[index][i] > 0){
-                targets.push_back(i);
+                if(castles[i].conqueredBy != index){
+                    targets.push_back(i);
+                }
             }
         }
         return targets;
@@ -892,6 +899,7 @@ public:
         return sum;
     }
     void buildArmyToAttack(){
+        vector<int> popFromSoldersCount(castleCount , 0);
         for (int castleIndex = 0; castleIndex < castles.size(); ++castleIndex) {
             if(!castles[castleIndex].soldiers.empty()){
                 vector<int> targets = getTargets(castleIndex);
@@ -903,7 +911,7 @@ public:
                 for (int i = 0; i < targets.size(); ++i) {
                     int countSoldiers = getSoldierCountForAttack(castleIndex ,targets[i] ,sumOfTargetCapacities );
                     if(countSoldiers > 0){
-                        queue<Soldier> qAttackers = castles[castleIndex].topPopSoldier(countSoldiers);
+                        queue<Soldier> qAttackers = castles[castleIndex].topSoldier(countSoldiers);
                         sumSoldiersToAttack += countSoldiers;
                         Army a(castleIndex , targets[i] ,getDistance(castleIndex ,targets[i]) , countSoldiers , qAttackers);
                         armies.push_back(a);
@@ -914,17 +922,18 @@ public:
                 int remainCount = (output - sumSoldiersToAttack);
                 armies[lowestArmyIndex].count += remainCount;
 
-                queue<Soldier> qRemainAttackers = castles[castleIndex].topPopSoldier(remainCount);
+                queue<Soldier> qRemainAttackers = castles[castleIndex].topSoldier(remainCount);
                 while (!qRemainAttackers.empty()){
                     armies[lowestArmyIndex].soldiers.push(qRemainAttackers.front());
                     qRemainAttackers.pop();
                 }
+                popFromSoldersCount[castleIndex] = output;
             }
 
         }
-        /*for (int castleIndex = 0; castleIndex < castles.size(); ++castleIndex) {
-            int output = (castles[castleIndex].soldiers.size() > outputCapacity) ? outputCapacity : castles[castleIndex].soldiers.size();
-        }*/
+        for (int castleIndex = 0; castleIndex < castles.size(); ++castleIndex) {
+            castles[castleIndex].popSoldiers(popFromSoldersCount[castleIndex]);
+        }
     }
 
 
@@ -989,14 +998,19 @@ public:
 
                 Soldier attackerEnemy = castles[castleIndex].enemyQueue.front();
                 castles[castleIndex].enemyQueue.pop();
-                Soldier defencer = castles[castleIndex].chooseSoldierToWar(attackerEnemy.power);
-                if(isEnemyWon(attackerEnemy , defencer)){
-                    castles[castleIndex].enemyQueue.push(attackerEnemy);
-                    castles[castleIndex].deadStack.push(defencer);
+                if(!castles[castleIndex].soldiers.empty()){
+                    Soldier defencer = castles[castleIndex].chooseSoldierToWar(attackerEnemy.power);
+                    if(isEnemyWon(attackerEnemy , defencer)){
+                        castles[castleIndex].enemyQueue.push(attackerEnemy);
+                        castles[castleIndex].deadStack.push(defencer);
+                    }else{
+                        castles[castleIndex].soldiers.push_back(defencer);
+                        castles[attackerEnemy.castleIndex].deadStack.push(attackerEnemy);
+                    }
                 }else{
-                    castles[castleIndex].soldiers.push_back(defencer);
-                    castles[attackerEnemy.castleIndex].deadStack.push(attackerEnemy);
+                    castles[castleIndex].conqueredBy = attackerEnemy.castleIndex;
                 }
+
 
                 warCount--;
             }
@@ -1130,10 +1144,10 @@ int main() {
 
         g.war();
 
-        //TODO: rise of deads
+
         g.riseOfDeads();
         c++;
-        if(c == 3)
+        if(c == 5)
             break;
     }
 
