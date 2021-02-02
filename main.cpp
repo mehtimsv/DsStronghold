@@ -1091,16 +1091,39 @@ public:
 int main() {
     srand (time(0));
 
+    int outputCapacity , soldierSpeed ,castleCount;
+    float healSpead;
+
+    cout<<"Welcome To The Game ;) Lets Config The game:"<<endl;
+    cout<<"outputCapacity:";
+    cin>>outputCapacity;
+    cout<<"solderSpeed:";
+    cin>>soldierSpeed;
+    cout<<"healSpeed:";
+    cin>>healSpead;
+    cout<<"castleCount:";
+    cin>>castleCount;
 
 
+
+    Game g(castleCount , outputCapacity , soldierSpeed , healSpead);
+
+    cout<<"adjMatrix:"<<endl;
+    for (int i = 0; i < castleCount; ++i) {
+        for (int j = 0; j < castleCount; ++j) {
+            int w;
+            cin>>w;
+            g.addEdge(i , j , w);
+        }
+    }
     // adj matrix :
-    Game g(5 , 10 , 50 , 0.5);
-    g.addEdge(0, 1,60);
+//    Game g(5 , 10 , 50 , 0.5);
+    /*g.addEdge(0, 1,60);
     g.addEdge(1, 2,210);
     g.addEdge(1, 3,366);
     g.addEdge(1, 4,400);
     g.addEdge(2, 3,120);
-    g.addEdge(3, 4,200);
+    g.addEdge(3, 4,200);*/
 
     g.toString();
 
