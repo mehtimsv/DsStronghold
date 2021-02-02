@@ -902,6 +902,7 @@ public:
         castles[0].color = 'g';
         castles[0].d = 0;
         castles[0].p = -1;
+        inputSoldiersToCastle(0);
         QUEUE<Castle> q;
         q.push(castles[0]);
         while (!q.empty()){
@@ -912,6 +913,7 @@ public:
                     castles[x].color = 'g';
                     castles[x].d = u.d + 1;
                     castles[x].p = u.index;
+                    inputSoldiersToCastle(x);
                     q.push(castles[x]);
                 }
             }
@@ -919,7 +921,17 @@ public:
 
         }
     }
+    void inputSoldiersToCastle(int castleIndex){
 
+        cout<<"Input Soldiers Count For Castle "<<castleIndex<<": ";
+        cin>>castles[castleIndex].capacity;
+        cout<<"Enter Solders Power: ";
+        for (int i = 0; i < castles[castleIndex].capacity; ++i) {
+            int p;
+            cin>>p;
+            castles[castleIndex].soldiers.push_back(Soldier(p , castleIndex));
+        }
+    }
     vector<int> getNeighbers(int castleIndex){
         vector<int> neighbers;
         for (int i = 0; i < castleCount; i++) {
@@ -1171,15 +1183,15 @@ int main() {
     g.toString();
 
     //castle info :
-    g.castles[0].setInfo(0 , 50);
-    g.castles[1].setInfo(1 , 200);
-    g.castles[2].setInfo(2 , 300);
-    g.castles[3].setInfo(3 , 400);
-    g.castles[4].setInfo(4 , 500);
+//    g.castles[0].setInfo(0 , 50);
+//    g.castles[1].setInfo(1 , 200);
+//    g.castles[2].setInfo(2 , 300);
+//    g.castles[3].setInfo(3 , 400);
+//    g.castles[4].setInfo(4 , 500);
 
 //    int s[5] = {5,4,3,2,1};
 //    g.castles[0].addSoldiers(s);
-    for (int i = 0; i < 50; ++i) {
+    /*for (int i = 0; i < 50; ++i) {
             g.castles[0].soldiers.push_back(Soldier(5 , 0));
 //            g.castles[0].soldiersAVL.insert(Soldier(getRandomInt() , 0));
         if(i >= 10)
@@ -1197,7 +1209,7 @@ int main() {
 //            g.castles[4].soldiersAVL.insert(Soldier(5 , 4));
         }
 
-    }
+    }*/
 
 //    g.castles[0].soldiersAVL.display();
     int c = 0;
