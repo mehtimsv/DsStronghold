@@ -749,7 +749,7 @@ public:
     string name;
     string owner;
     int capacity;
-    queue<int> inputQueue;
+    queue<Soldier> inputQueue;
 //    AVL soldiersAVL;
     vector<Soldier> soldiers;
 
@@ -779,6 +779,17 @@ public:
             cout<<soldiers[i];
         }
     }
+    queue<Soldier> topPopSoldier(int count){
+        queue<Soldier> tmp;
+        for (int i = 0; i < count; ++i) {
+            tmp.push(soldiers[i]);
+        }
+        for (int i = 0; i < count; ++i) {
+            soldiers.erase(soldiers.begin() + i);
+        }
+        return tmp;
+    }
+
 };
 
 class Army{
@@ -791,8 +802,8 @@ public:
     Army(){
 
     }
-    Army(int src, int dest, int distance,int count) : src(src), dest(dest), distance(distance) ,count(count) {
-
+    Army(int src, int dest, int distance,int count,queue<Soldier> attackers) : src(src), dest(dest), distance(distance) ,count(count) {
+        soldiers = attackers;
     }
 
     bool move(int speed){
@@ -851,6 +862,37 @@ public:
         }
         return sum;
     }
+    void attack(){
+        for (int castleIndex = 0; castleIndex < castles.size(); ++castleIndex) {
+            vector<int> targets = getTargets(castleIndex);
+
+            int sumOfTargetCapacities = getAttackTargetCapacitySum(targets);
+
+
+            int sumSoldiersToAttack=0;
+            for (int i = 0; i < targets.size(); ++i) {
+                int countSoldiers = getSoldierCountForAttack(castleIndex ,targets[i] ,sumOfTargetCapacities );
+                queue<Soldier> qAttackers = castles[castleIndex].topPopSoldier(countSoldiers);
+                sumSoldiersToAttack += countSoldiers;
+                Army a(castleIndex , targets[i] ,getDistance(castleIndex ,targets[i]) , countSoldiers , qAttackers);
+                armies.push_back(a);
+            }
+            int output = (castles[castleIndex].soldiers.size() > outputCapacity) ? outputCapacity : castles[castleIndex].soldiers.size();
+            int lowestArmyIndex = getArmyIndexBySrcDes(castleIndex , getLowestCapacityDesIndex(targets) ,targets.size());
+            int remainCount = (output - sumSoldiersToAttack);
+            armies[lowestArmyIndex].count += remainCount;
+
+            queue<Soldier> qRemainAttackers = castles[castleIndex].topPopSoldier(remainCount);
+            while (!qRemainAttackers.empty()){
+                armies[lowestArmyIndex].soldiers.push(qRemainAttackers.front());
+                qRemainAttackers.pop();
+            }
+        }
+        /*for (int castleIndex = 0; castleIndex < castles.size(); ++castleIndex) {
+            int output = (castles[castleIndex].soldiers.size() > outputCapacity) ? outputCapacity : castles[castleIndex].soldiers.size();
+        }*/
+    }
+
     void attack(int castleIndex){
         vector<int> targets = getTargets(castleIndex);
 
@@ -861,8 +903,8 @@ public:
         for (int i = 0; i < targets.size(); ++i) {
                 int countSoldiers = getSoldierCountForAttack(castleIndex ,targets[i] ,sumOfTargetCapacities );
                 sumSoldiersToAttack += countSoldiers;
-                Army a(castleIndex , targets[i] ,getDistance(castleIndex ,targets[i]) , countSoldiers);
-                armies.push_back(a);
+//                Army a(castleIndex , targets[i] ,getDistance(castleIndex ,targets[i]) , countSoldiers,queue<Soldier>(5));
+//                armies.push_back(a);
         }
         int output = (castles[castleIndex].soldiers.size() > outputCapacity) ? outputCapacity : castles[castleIndex].soldiers.size();
         int lowestArmyIndex = getArmyIndexBySrcDes(castleIndex , getLowestCapacityDesIndex(targets) ,targets.size());
@@ -895,6 +937,7 @@ public:
         int output = (castles[srcCastleIndex].soldiers.size() > outputCapacity) ? outputCapacity : castles[srcCastleIndex].soldiers.size();
 
         float s = (float)sumAllCastle;
+        cout<<srcCastleIndex<<"-"<<desCastleIndex<<"-"<<sumAllCastle<<"-"<<castles[desCastleIndex].soldiers.size() / s * output<<endl;
         return castles[desCastleIndex].soldiers.size() / s * output;
     }
     // Add edges
@@ -908,7 +951,14 @@ public:
         adjMatrix[i][j] = 0;
         adjMatrix[j][i] = 0;
     }
-
+    void setArmyArrived(int armyIndex ){
+        int targetDes = armies[armyIndex].dest;
+        while (!armies[armyIndex].soldiers.empty()) {
+            castles[targetDes].inputQueue.push(armies[armyIndex].soldiers.front());
+            armies[armyIndex].soldiers.pop();
+        }
+        armies[armyIndex].isArrived = true;
+    }
     // Print the martix
     void toString() {
         for (int i = 0; i < castleCount; i++) {
@@ -978,24 +1028,22 @@ int main() {
     int c = 0;
     while (true){
 
-        for (int i = 0; i < g.castleCount; ++i) {
+        /*for (int i = 0; i < g.castleCount; ++i) {
             g.attack(i);
-        }
+        }*/
+        g.attack();
+
         for (int i = 0; i <g.armies.size(); ++i) {
             if(g.armies[i].move(g.speed) && !g.armies[i].isArrived){
                 int targetDes = g.armies[i].dest;
 
-
-                //TODO: add soldiers to input queue
-                g.castles[targetDes].inputQueue.push(g.armies[i].count);
-                g.armies[i].isArrived = true;
-
+                g.setArmyArrived(i);
             }
 
         }
 
         c++;
-        if(c == 10)
+        if(c == 5)
             break;
     }
 
