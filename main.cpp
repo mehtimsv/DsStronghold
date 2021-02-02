@@ -759,9 +759,8 @@ void printGraph(Graph const &graph, int N)
 class Castle{
 public:
     int index;
-    string name;
-    string owner;
     int capacity;
+    int conqueredBy = -1;
     queue<Soldier> inputQueue;
     queue<Soldier> enemyQueue;
 //    AVL soldiersAVL;
@@ -973,7 +972,14 @@ public:
         cout<<srcCastleIndex<<"-"<<desCastleIndex<<"-"<<sumAllCastle<<"-"<<castles[desCastleIndex].soldiers.size() / s * output<<endl;
         return castles[desCastleIndex].soldiers.size() / s * output;
     }
-
+    void armyMovement(){
+        for (int i = 0; i <armies.size(); ++i) {
+            if(armies[i].move(speed) && !armies[i].isArrived){
+                int targetDes = armies[i].dest;
+                setArmyArrived(i);
+            }
+        }
+    }
     void crossTheGate(){
         for (int castleIndex = 0; castleIndex < castles.size(); castleIndex++) {
             if(!castles[castleIndex].inputQueue.empty()){
@@ -1111,18 +1117,20 @@ int main() {
             g.attack(i);
         }*/
         g.attack();
-
-        for (int i = 0; i <g.armies.size(); ++i) {
+        /*for (int i = 0; i <g.armies.size(); ++i) {
             if(g.armies[i].move(g.speed) && !g.armies[i].isArrived){
                 int targetDes = g.armies[i].dest;
 
                 g.setArmyArrived(i);
             }
 
-        }
+        }*/
+        g.armyMovement();
         g.crossTheGate();
 
         g.war();
+
+        //TODO: rise of deads
         c++;
         if(c == 3)
             break;
