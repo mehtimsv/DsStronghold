@@ -927,24 +927,7 @@ public:
         }*/
     }
 
-    void attack(int castleIndex){
-        vector<int> targets = getTargets(castleIndex);
 
-        int sumOfTargetCapacities = getAttackTargetCapacitySum(targets);
-
-
-        int sumSoldiersToAttack=0;
-        for (int i = 0; i < targets.size(); ++i) {
-                int countSoldiers = getSoldierCountForAttack(castleIndex ,targets[i] ,sumOfTargetCapacities );
-                sumSoldiersToAttack += countSoldiers;
-//                Army a(castleIndex , targets[i] ,getDistance(castleIndex ,targets[i]) , countSoldiers,queue<Soldier>(5));
-//                armies.push_back(a);
-        }
-        int output = (castles[castleIndex].soldiers.size() > outputCapacity) ? outputCapacity : castles[castleIndex].soldiers.size();
-        int lowestArmyIndex = getArmyIndexBySrcDes(castleIndex , getLowestCapacityDesIndex(targets) ,targets.size());
-        armies[lowestArmyIndex].count += (output - sumSoldiersToAttack);
-
-    }
     int getArmyIndexBySrcDes(int src , int des , int lastAttackTargetsCount){
         for (int i = armies.size() - lastAttackTargetsCount; i < armies.size(); ++i) {
             if(armies[i].src == src && armies[i].dest == des){
