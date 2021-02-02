@@ -875,10 +875,12 @@ public:
                 int sumSoldiersToAttack=0;
                 for (int i = 0; i < targets.size(); ++i) {
                     int countSoldiers = getSoldierCountForAttack(castleIndex ,targets[i] ,sumOfTargetCapacities );
-                    queue<Soldier> qAttackers = castles[castleIndex].topPopSoldier(countSoldiers);
-                    sumSoldiersToAttack += countSoldiers;
-                    Army a(castleIndex , targets[i] ,getDistance(castleIndex ,targets[i]) , countSoldiers , qAttackers);
-                    armies.push_back(a);
+                    if(countSoldiers > 0){
+                        queue<Soldier> qAttackers = castles[castleIndex].topPopSoldier(countSoldiers);
+                        sumSoldiersToAttack += countSoldiers;
+                        Army a(castleIndex , targets[i] ,getDistance(castleIndex ,targets[i]) , countSoldiers , qAttackers);
+                        armies.push_back(a);
+                    }
                 }
                 int output = (castles[castleIndex].soldiers.size() > outputCapacity) ? outputCapacity : castles[castleIndex].soldiers.size();
                 int lowestArmyIndex = getArmyIndexBySrcDes(castleIndex , getLowestCapacityDesIndex(targets) ,targets.size());
