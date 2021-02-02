@@ -864,29 +864,32 @@ public:
     }
     void attack(){
         for (int castleIndex = 0; castleIndex < castles.size(); ++castleIndex) {
-            vector<int> targets = getTargets(castleIndex);
+            if(!castles[castleIndex].soldiers.empty()){
+                vector<int> targets = getTargets(castleIndex);
 
-            int sumOfTargetCapacities = getAttackTargetCapacitySum(targets);
+                int sumOfTargetCapacities = getAttackTargetCapacitySum(targets);
 
 
-            int sumSoldiersToAttack=0;
-            for (int i = 0; i < targets.size(); ++i) {
-                int countSoldiers = getSoldierCountForAttack(castleIndex ,targets[i] ,sumOfTargetCapacities );
-                queue<Soldier> qAttackers = castles[castleIndex].topPopSoldier(countSoldiers);
-                sumSoldiersToAttack += countSoldiers;
-                Army a(castleIndex , targets[i] ,getDistance(castleIndex ,targets[i]) , countSoldiers , qAttackers);
-                armies.push_back(a);
+                int sumSoldiersToAttack=0;
+                for (int i = 0; i < targets.size(); ++i) {
+                    int countSoldiers = getSoldierCountForAttack(castleIndex ,targets[i] ,sumOfTargetCapacities );
+                    queue<Soldier> qAttackers = castles[castleIndex].topPopSoldier(countSoldiers);
+                    sumSoldiersToAttack += countSoldiers;
+                    Army a(castleIndex , targets[i] ,getDistance(castleIndex ,targets[i]) , countSoldiers , qAttackers);
+                    armies.push_back(a);
+                }
+                int output = (castles[castleIndex].soldiers.size() > outputCapacity) ? outputCapacity : castles[castleIndex].soldiers.size();
+                int lowestArmyIndex = getArmyIndexBySrcDes(castleIndex , getLowestCapacityDesIndex(targets) ,targets.size());
+                int remainCount = (output - sumSoldiersToAttack);
+                armies[lowestArmyIndex].count += remainCount;
+
+                queue<Soldier> qRemainAttackers = castles[castleIndex].topPopSoldier(remainCount);
+                while (!qRemainAttackers.empty()){
+                    armies[lowestArmyIndex].soldiers.push(qRemainAttackers.front());
+                    qRemainAttackers.pop();
+                }
             }
-            int output = (castles[castleIndex].soldiers.size() > outputCapacity) ? outputCapacity : castles[castleIndex].soldiers.size();
-            int lowestArmyIndex = getArmyIndexBySrcDes(castleIndex , getLowestCapacityDesIndex(targets) ,targets.size());
-            int remainCount = (output - sumSoldiersToAttack);
-            armies[lowestArmyIndex].count += remainCount;
 
-            queue<Soldier> qRemainAttackers = castles[castleIndex].topPopSoldier(remainCount);
-            while (!qRemainAttackers.empty()){
-                armies[lowestArmyIndex].soldiers.push(qRemainAttackers.front());
-                qRemainAttackers.pop();
-            }
         }
         /*for (int castleIndex = 0; castleIndex < castles.size(); ++castleIndex) {
             int output = (castles[castleIndex].soldiers.size() > outputCapacity) ? outputCapacity : castles[castleIndex].soldiers.size();
