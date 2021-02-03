@@ -10,28 +10,30 @@
 #if CHECK
 #define STACK stack
 #define QUEUE queue
+#define VECTOR vector
 #else
 #define STACK Stack
 #define QUEUE Queue
+#define VECTOR vector
 #endif
 using namespace std;
 template <typename T>
-class MyVector{
+class Vector{
 private:
     T* value;
-    int size = 0;
+    int isize = 0;
 public:
-    MyVector(){
+    Vector(){
 
     }
-    MyVector(int maxSize) {
-        size = maxSize;
+    Vector(int maxSize) {
+        isize = maxSize;
         value = (T*)malloc(maxSize * sizeof(T));
         for (int i = 0; i < maxSize; i++)
             value[i] = 0;
     }
-    MyVector(int maxSize, T data) {
-        size = maxSize;
+    Vector(int maxSize, T data) {
+        isize = maxSize;
         value = (T*)malloc(maxSize * sizeof(T));
         for (int i = 0; i < maxSize; i++)
             value[i] = data;
@@ -42,16 +44,16 @@ public:
     T& getAt(int index) {
         return value[index];
     }
-    friend ostream &operator<<( ostream &output, const MyVector<T> &vector ){
-        for (int i = 0; i < vector.size; i++)
+    friend ostream &operator<<( ostream &output, const Vector<T> &vector ){
+        for (int i = 0; i < vector.isize; i++)
             output << vector[i] << " ";
         output << "\n";
         return output;
     }
     void insert(int index, T val){
-        size++;
-        value = (T*)realloc(value, (size) * sizeof(T));
-        int i = size+1;
+        isize++;
+        value = (T*)realloc(value, (isize) * sizeof(T));
+        int i = isize + 1;
         while(i != index){
             value[i] = value[i - 1];
             i--;
@@ -59,9 +61,9 @@ public:
         value[index] = val;
     }
     void push_front(T val) {
-        size++;
-        value = (T*)realloc(value, (size) * sizeof(T));
-        int i = size+1;
+        isize++;
+        value = (T*)realloc(value, (isize) * sizeof(T));
+        int i = isize + 1;
         while(i != 0){
             value[i] = value[i - 1];
             i--;
@@ -69,34 +71,34 @@ public:
         value[0] = val;
     }
     void push_back(T val){
-        value = (T*)realloc(value, (size + 1) * sizeof(T));
-        value[size] = val;
-        size++;
+        value = (T*)realloc(value, (isize + 1) * sizeof(T));
+        value[isize] = val;
+        isize++;
     }
     void pop(){
-        value[size] = NULL;
-        size--;
-        value = (T*)realloc(value, (size) * sizeof(T));
+        value[isize] = NULL;
+        isize--;
+        value = (T*)realloc(value, (isize) * sizeof(T));
     }
-    void remove(int index){
+    void erase(int index){
         value[index] = NULL;
-        while(index <= size){
+        while(index <= isize){
             value[index] = value[index + 1];
             index++;
         }
-        size--;
-        value = (T*)realloc(value, (size) * sizeof(T));
+        isize--;
+        value = (T*)realloc(value, (isize) * sizeof(T));
     }
     int find(T data){
-        for (int i = 0; i < size; i++)
+        for (int i = 0; i < isize; i++)
             if (data == value[i])
                 return i;
         return NULL;
     }
-    int getSize(){
-        return size;
+    int size(){
+        return isize;
     }
-    ~MyVector() {
+    ~Vector() {
         free(value);
     }
 };
@@ -266,7 +268,7 @@ public:
     QUEUE<Soldier> inputQueue;
     QUEUE<Soldier> enemyQueue;
 //    AVL soldiersAVL;
-    vector<Soldier> soldiers;
+    VECTOR<Soldier> soldiers;
     STACK<Soldier> deadStack;
 
     Castle(){
@@ -358,11 +360,11 @@ public:
     int** adjMatrix;
     int castleCount;
 //    Castle* castles;
-    vector<Castle> castles;
+    VECTOR<Castle> castles;
     int outputCapacity;
     int speed;
     float healSpeed;
-    vector<Army> armies;
+    VECTOR<Army> armies;
 
     // Initialize the matrix to zero
     Game(int count , int _outputCapacity , int _speed , float _healSpeed) {
@@ -424,8 +426,8 @@ public:
             castles[castleIndex].soldiers.push_back(Soldier(p , castleIndex));
         }
     }
-    vector<int> getNeighbers(int castleIndex){
-        vector<int> neighbers;
+    VECTOR<int> getNeighbers(int castleIndex){
+        VECTOR<int> neighbers;
         for (int i = 0; i < castleCount; i++) {
             if(adjMatrix[castleIndex][i] > 0){
                 neighbers.push_back(i);
@@ -433,10 +435,10 @@ public:
         }
         return neighbers;
     }
-    vector<int> getTargets(int index){
+    VECTOR<int> getTargets(int index){
         // Castle targetCastles[castleCount];
 //        int targetCastlesIndex[castleCount];
-        vector<int> targets;
+        VECTOR<int> targets;
 
         for (int i = 0; i < castleCount; i++) {
             if(adjMatrix[index][i] > 0){
@@ -447,7 +449,7 @@ public:
         }
         return targets;
     }
-    int getAttackTargetCapacitySum(vector<int> v){
+    int getAttackTargetCapacitySum(VECTOR<int> v){
         int sum = 0;
         for (int i = 0; i < v.size(); ++i) {
             sum += castles[v[i]].soldiers.size();
@@ -455,10 +457,10 @@ public:
         return sum;
     }
     void buildArmyToAttack(){
-        vector<int> popFromSoldersCount(castleCount , 0);
+        VECTOR<int> popFromSoldersCount(castleCount , 0);
         for (int castleIndex = 0; castleIndex < castles.size(); ++castleIndex) {
             if(!castles[castleIndex].soldiers.empty()){
-                vector<int> targets = getTargets(castleIndex);
+                VECTOR<int> targets = getTargets(castleIndex);
 
                 int sumOfTargetCapacities = getAttackTargetCapacitySum(targets);
 
@@ -500,7 +502,7 @@ public:
             }
         }
     }
-    int getLowestCapacityDesIndex(vector<int> targets){
+    int getLowestCapacityDesIndex(VECTOR<int> targets){
         int min = 100000;
         int minIndex;
         for (int i = 0; i < targets.size(); ++i) {
