@@ -553,7 +553,13 @@ public:
             if(!castles[castleIndex].inputQueue.empty()){
 
                 float behindGateCount = (float)castles[castleIndex].inputQueue.size();
-                int countCanCrossTheGate =  ceil(behindGateCount / castles[castleIndex].soldiers.size());
+                int countCanCrossTheGate;
+                if(castles[castleIndex].soldiers.size() == 0){
+                    countCanCrossTheGate =  ceil(behindGateCount  / outputCapacity);
+                }else{
+                    countCanCrossTheGate =  ceil(behindGateCount / castles[castleIndex].soldiers.size());
+                }
+
 //                cout<<"cross the gate "<<castleIndex<<":"<<countCanCrossTheGate<<endl;
                 for (int i = 0; i < countCanCrossTheGate; ++i) {
                     castles[castleIndex].enemyQueue.push(castles[castleIndex].inputQueue.front());
@@ -609,7 +615,7 @@ public:
     void statusHandler(int timeLaps){
         cout<<"Status Handler TimeLaps #"<<timeLaps<<" :"<<endl;
         while (true){
-            cout<<" Enter Castle Index To get Info Or (-1 -> skip | -2 -> show All armies):";
+            cout<<" Enter Castle Index To get Info Or (-1 -> next Next TimeLaps | -2 -> show All armies):";
             int cmd;
             cin>>cmd;
             if(cmd == -1)
