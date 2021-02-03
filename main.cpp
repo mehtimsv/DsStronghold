@@ -606,7 +606,28 @@ public:
         }
 
     }
-
+    void statusHandler(int timeLaps){
+        cout<<"Status Handler TimeLaps #"<<timeLaps<<" :"<<endl;
+        while (true){
+            cout<<" Enter Castle Index To get Info Or (-1 -> skip | -2 -> show All armies):";
+            int cmd;
+            cin>>cmd;
+            if(cmd == -1)
+                break;
+            else if(cmd == -2){
+                for (int i = 0; i < armies.size(); ++i) {
+                    cout<<"Info of Army #"<<i<<" :"<<endl;
+                    cout<<" Count:"<<armies[i].count<<" Src: "<<armies[i].src<<" Dest: "<<armies[i].dest<<" Distance: "<<armies[i].distance<<" isArrived: "<<armies[i].isArrived<<endl;
+                }
+            }else{
+                cout<<"Castle Soldiers Count:"<<castles[cmd].soldiers.size()<<endl;
+                cout<<"Castle inputQueue Size:"<<castles[cmd].inputQueue.size()<<endl;
+                cout<<"Castle enemyQueue Size:"<<castles[cmd].enemyQueue.size()<<endl;
+                cout<<"Castle deadStack Size:"<<castles[cmd].deadStack.size()<<endl;
+                cout<<"Castle conqueredBy:"<<castles[cmd].conqueredBy<<endl;
+            }
+        }
+    }
     void addEdge(int i, int j , int weight) {
         adjMatrix[i][j] = weight;
         adjMatrix[j][i] = weight;
@@ -728,8 +749,10 @@ int main() {
 
 
         g.riseOfDeads();
+
+        g.statusHandler(c);
         c++;
-        if(c == 15)
+        if(c == 5)
             break;
     }
 
